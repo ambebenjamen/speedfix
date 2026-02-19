@@ -1,0 +1,136 @@
+export type IssueTemplate = {
+  title: string;
+  category: "speed" | "seo" | "accessibility" | "best-practices";
+  severity?: "critical" | "high" | "medium" | "low";
+  why: string;
+  how: string;
+  code?: string;
+  impact: string;
+};
+
+export const issueTemplates: Record<string, IssueTemplate> = {
+  "largest-contentful-paint": {
+    title: "Largest Contentful Paint is slow",
+    category: "speed",
+    severity: "high",
+    why: "Your main content takes too long to appear. Users feel the page is slow and Google may rank it lower.",
+    how: "Compress large images, reduce render-blocking CSS, and cache static assets.",
+    code: `<img src="/hero.webp" width="1200" height="700" loading="lazy" alt="Hero" />`,
+    impact: "Faster perceived load time and improved Core Web Vitals.",
+  },
+  "cumulative-layout-shift": {
+    title: "Layout shifts on load",
+    category: "speed",
+    severity: "high",
+    why: "Elements move around while loading, which frustrates users and hurts rankings.",
+    how: "Set width/height on images and reserve space for ads or embeds.",
+    code: `<img src="/banner.webp" width="1200" height="400" alt="Banner" />`,
+    impact: "More stable page and better CLS score.",
+  },
+  "total-blocking-time": {
+    title: "Too much JavaScript blocks interactivity",
+    category: "speed",
+    severity: "high",
+    why: "Heavy scripts make the page feel unresponsive for real users.",
+    how: "Split large bundles and defer non-critical scripts.",
+    code: `<Script src="/analytics.js" strategy="afterInteractive" />`,
+    impact: "Lower TBT and faster time-to-interactive.",
+  },
+  "uses-optimized-images": {
+    title: "Images are not optimized",
+    category: "speed",
+    severity: "medium",
+    why: "Large images slow your site and increase data usage on mobile.",
+    how: "Compress images and serve modern formats like WebP or AVIF.",
+    code: `<img src="/product.avif" width="800" height="600" alt="Product" />`,
+    impact: "Smaller page size and faster LCP.",
+  },
+  "uses-modern-image-formats": {
+    title: "Use modern image formats",
+    category: "speed",
+    severity: "medium",
+    why: "JPEG/PNG files are bigger than modern formats, slowing load time.",
+    how: "Convert hero and gallery images to WebP or AVIF.",
+    code: `<picture><source type="image/avif" srcSet="/hero.avif" /><img src="/hero.jpg" alt="Hero" /></picture>`,
+    impact: "Reduced image bytes and faster load.",
+  },
+  "uses-text-compression": {
+    title: "Enable text compression",
+    category: "speed",
+    severity: "medium",
+    why: "Uncompressed HTML/CSS/JS increases download time.",
+    how: "Enable Brotli or Gzip at the server or CDN.",
+    code: `# Example Nginx\nbrotli on;\ngzip on;`,
+    impact: "Smaller payloads and faster first load.",
+  },
+  "render-blocking-resources": {
+    title: "Render-blocking resources detected",
+    category: "speed",
+    severity: "high",
+    why: "Critical CSS and JS delay content from showing.",
+    how: "Inline critical CSS and defer non-critical scripts.",
+    code: `<link rel="preload" href="/styles.css" as="style" />`,
+    impact: "Improved FCP and LCP.",
+  },
+  "unused-javascript": {
+    title: "Remove unused JavaScript",
+    category: "speed",
+    severity: "medium",
+    why: "Extra JS increases load time and slows interactivity.",
+    how: "Code-split and remove unused libraries.",
+    code: `import dynamic from "next/dynamic";\nconst Chart = dynamic(() => import("./Chart"));`,
+    impact: "Smaller bundles and faster TBT.",
+  },
+  "meta-description": {
+    title: "Missing meta description",
+    category: "seo",
+    severity: "medium",
+    why: "Search engines use this to understand your page. Missing descriptions reduce click-through rate.",
+    how: "Add a concise, keyword-rich meta description.",
+    code: `<meta name="description" content="Fast, affordable website speed and SEO fixes." />`,
+    impact: "Better CTR from search results.",
+  },
+  "document-title": {
+    title: "Missing or weak page title",
+    category: "seo",
+    severity: "high",
+    why: "Titles are a top ranking signal and help users understand the page.",
+    how: "Add a clear, unique title with the main keyword.",
+    code: `<title>Website Speed & SEO Fixes in Minutes</title>`,
+    impact: "Improved SEO relevance and click-through.",
+  },
+  "image-alt": {
+    title: "Images missing alt text",
+    category: "accessibility",
+    severity: "medium",
+    why: "Screen readers rely on alt text to describe images.",
+    how: "Add descriptive alt text to all meaningful images.",
+    code: `<img src="/team.jpg" alt="Our team in the office" />`,
+    impact: "Better accessibility and image SEO.",
+  },
+  "color-contrast": {
+    title: "Low text contrast",
+    category: "accessibility",
+    severity: "high",
+    why: "Low contrast makes text hard to read, especially for visually impaired users.",
+    how: "Increase contrast between text and background colors.",
+    impact: "Improved readability and accessibility score.",
+  },
+  "link-text": {
+    title: "Links lack descriptive text",
+    category: "accessibility",
+    severity: "medium",
+    why: "Screen readers need clear link names to describe destinations.",
+    how: "Replace vague labels like “click here” with descriptive text.",
+    code: `<a href="/pricing">View pricing</a>`,
+    impact: "Better accessibility and user clarity.",
+  },
+  "is-on-https": {
+    title: "Site is not using HTTPS",
+    category: "best-practices",
+    severity: "critical",
+    why: "HTTPS protects users and is a Google ranking factor.",
+    how: "Enable HTTPS through your host or CDN and redirect HTTP to HTTPS.",
+    impact: "Improved trust and SEO ranking.",
+  },
+};
