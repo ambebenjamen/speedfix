@@ -13,12 +13,22 @@ router.post("/request", async (req, res) => {
     return res.status(400).json({ error: "Invalid email" });
   }
 
-  const email = parsed.data.email.toLowerCase();
-  const { token } = await createVerificationToken(email);
-  const link = `${process.env.APP_URL}/auth/callback?token=${token}&email=${encodeURIComponent(email)}`;
+  try {
+    const email = parsed.data.email.toLowerCase();
+    const { token } = await createVerificationToken(email);
+    const appUrl = process.env.APP_URL;
+    if (!appUrl) {
+      return res.status(500).json({ error: "APP_URL is not configured on the backend." });
+    }
+    const link = `${appUrl}/auth/callback?token=${token}&email=${encodeURIComponent(email)}`;
 
-  await sendMagicLink(email, link);
-  return res.json({ ok: true });
+    await sendMagicLink(email, link);
+    return res.json({ ok: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[auth/request] failed:", message);
+    return res.status(500).json({ error: message });
+  }
 });
 
 router.post("/verify", async (req, res) => {
