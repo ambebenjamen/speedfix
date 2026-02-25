@@ -5,24 +5,25 @@ import { prisma } from "../prisma";
 
 const router = Router();
 
-const emailSchema = z.object({ email: z.string().email() });
+const emailSchema = z.string().email();
 
 router.post("/request", async (req, res) => {
-  const parsed = emailSchema.safeParse(req.body);
+  const rawEmail = typeof req.body?.email === "string" ? req.body.email : "";
+  const email = rawEmail.trim().toLowerCase();
+  const parsed = emailSchema.safeParse(email);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid email" });
   }
 
   try {
-    const email = parsed.data.email.toLowerCase();
-    const { token } = await createVerificationToken(email);
+    const { token } = await createVerificationToken(parsed.data);
     const appUrl = process.env.APP_URL;
     if (!appUrl) {
       return res.status(500).json({ error: "APP_URL is not configured on the backend." });
     }
-    const link = `${appUrl}/auth/callback?token=${token}&email=${encodeURIComponent(email)}`;
+    const link = `${appUrl}/auth/callback?token=${token}&email=${encodeURIComponent(parsed.data)}`;
 
-    await sendMagicLink(email, link);
+    await sendMagicLink(parsed.data, link);
     return res.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
