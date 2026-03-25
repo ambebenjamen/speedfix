@@ -10,6 +10,7 @@ import { prisma } from "./prisma";
 
 const app = express();
 const port = Number(process.env.PORT ?? 4000);
+let dbReady = false;
 
 /**
  * Normalize origin (remove trailing slash)
@@ -73,7 +74,21 @@ app.use(cookieParser());
  * Health check (frontend wake-up)
  */
 app.get("/health", (_req, res) => {
-  res.json({ ok: true });
+  res.json({ ok: true, dbReady });
+});
+
+/**
+ * While database is waking up, return a proper HTTP response instead of a
+ * network-level failure that browsers surface as a CORS error.
+ */
+app.use((req, res, next) => {
+  if (dbReady || req.path === "/health") {
+    return next();
+  }
+
+  return res
+    .status(503)
+    .json({ error: "Backend is waking up. Please retry shortly." });
 });
 
 /**
@@ -94,6 +109,7 @@ const waitForDatabase = async () => {
     try {
       await prisma.$connect();
       console.log("Database connected");
+      dbReady = true;
       return;
     } catch (error) {
       const isLastAttempt = attempt === maxAttempts;
@@ -115,14 +131,14 @@ const waitForDatabase = async () => {
  * Start server
  */
 const startServer = async () => {
+  app.listen(port, () => {
+    console.log(`Backend running on port ${port}`);
+  });
+
   try {
     await waitForDatabase();
-    app.listen(port, () => {
-      console.log(`Backend running on port ${port}`);
-    });
   } catch (error) {
-    console.error("Failed to start backend after DB retries", error);
-    process.exit(1);
+    console.error("Failed to connect DB after retries", error);
   }
 };
 
