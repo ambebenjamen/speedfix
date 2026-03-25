@@ -61,7 +61,7 @@ app.use(cors(corsOptions));
 /**
  * Handle preflight requests (OPTIONS)
  */
-app.options("*", cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 /**
  * Middlewares

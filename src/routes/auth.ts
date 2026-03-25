@@ -57,11 +57,13 @@ router.post("/verify", async (req, res) => {
   }
 
   const jwt = signToken(user.id);
-  const secure = process.env.COOKIE_SECURE === "1";
+  const secure =
+    process.env.COOKIE_SECURE === "1" || process.env.NODE_ENV === "production";
+  const sameSite = secure ? "none" : "lax";
   res.cookie("auth_token", jwt, {
     httpOnly: true,
     secure,
-    sameSite: secure ? "none" : "lax",
+    sameSite,
     maxAge: 1000 * 60 * 60 * 24 * 30,
     path: "/",
   });
@@ -70,7 +72,15 @@ router.post("/verify", async (req, res) => {
 });
 
 router.post("/logout", async (_req, res) => {
-  res.clearCookie("auth_token");
+  const secure =
+    process.env.COOKIE_SECURE === "1" || process.env.NODE_ENV === "production";
+  const sameSite = secure ? "none" : "lax";
+  res.clearCookie("auth_token", {
+    httpOnly: true,
+    secure,
+    sameSite,
+    path: "/",
+  });
   return res.json({ ok: true });
 });
 
